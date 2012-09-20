@@ -1,67 +1,71 @@
 package kr.iolo.berry.svc;
  
 import akka.actor._
+
 import akka.dispatch._
+
+import akka.kernel._
+
 import akka.util.duration._
-import org.joda.time._
+
+import akka.event.Logging
+
+import org.joda.time.DateTime
+
+import com.typesafe.config.ConfigFactory
  
-class BerryEntry(val id:String, val title:String, val updated:DateTime) {
+class Entry(val id:String, val title:String, val updated:DateTime) {
   override def toString = "[BerryEntry: id=%s, title=%s, updated=%s]".format(id, title, updated)
 }
 
-object BerryEntry {
-  def apply(id:String, title:String, updated:DateTime) = new BerryEntry(id, title, updated)
+object Entry {
+  def apply(id:String, title:String, updated:DateTime) = new Entry(id, title, updated)
 }
 
-trait BerryService {
-  def addEntry(entry:BerryEntry): Unit
+sealed trait BerryMessage
 
-  def removeEntry(id:String): Unit
+case class AddEntry(entry:Entry) extends BerryMessage
+case class RemoveEntry(id:String) extends BerryMessage
+case class FindEntry(id:String) extends BerryMessage
+case class ListEntries(offset:Int=0,limit:Int=0) extends BerryMessage
 
-  def listEntries(): Future[Iterable[BerryEntry]]
+class BerryService extends Actor {
+  val log = Logging(context.system, this)
+
+  val entries = new collection.mutable.HashMap[String,Entry]
+
+  def receive = {
+    case AddEntry(entry) => {
+      log.info("addEntry: entry=" + entry)
+      entries += (entry.id -> entry)
+    }
+    case RemoveEntry(id) => {
+      log.info("removeEntry: id=" + id)
+      entries -= id
+    }
+    case FindEntry(id) => {
+      log.info("findEntry: id=" + id)
+      sender ! entries(id)
+    }
+    case ListEntries(offset,limit) => {
+      log.info("listEntries: offset" + offset + ",limit=" + limit)
+      sender ! entries.values
+    }
+  }
 }
 
-// in-memory impl
-class BerryServiceImpl extends BerryService {
-
-  val entries = new collection.mutable.HashMap[String,BerryEntry]
-
-  import TypedActor.dispatcher
-
-  def addEntry(entry:BerryEntry) = {
-    entries += (entry.id -> entry)
-  }
-
-  def removeEntry(id:String) = {
-    entries -= id
-  }
-
-  def listEntries() = {
-    Promise.successful(entries.values)
-  }
+class BerryKernel extends Bootable {
+  val config = ConfigFactory.parseString("""
+akka {
+  loglevel = "DEBUG"
+  stdout-loglevel = "DEBUG"
 }
-
-object BerryLocalTestApp extends App {
- 
-  doLocalTest()
- 
-  def doLocalTest() {
-    val system = ActorSystem("BerrySystem")
- 
-    val berry:BerryService = TypedActor(system).typedActorOf(TypedProps[BerryServiceImpl]())
-
-    berry.addEntry(BerryEntry("1", "hello", DateTime.now))
-
-    berry.addEntry(BerryEntry("2", "world", DateTime.now))
-
-    println(Await.result(berry.listEntries(), 1 seconds))
-
-    berry.removeEntry("1")
-
-    println(Await.result(berry.listEntries(), 1 seconds))
-
-    berry.removeEntry("2")
-
-    println(Await.result(berry.listEntries(), 1 seconds))
+""")
+  val system = ActorSystem("berrySystem", ConfigFactory.load(config))
+  def startup = {
+    system.actorOf(Props[BerryService], "berryService")
+  }
+  def shutdown = {
+    system.shutdown()
   }
 }
