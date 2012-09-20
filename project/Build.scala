@@ -28,33 +28,33 @@ object BerryKernelBuild extends Build {
 }
 
 object Resolvers {
-  val Akka = "Akka Repo" at "http://repo.akka.io/releases/"
-  val Typesafe = "Typesafe Repo" at "http://repo.typesafe.com/typesafe/releases/"
-  val Spray = "Spray Repo" at "http://repo.spray.cc/"
+  val akka = "Akka Repo" at "http://repo.akka.io/releases/"
+  val typesafe = "Typesafe Repo" at "http://repo.typesafe.com/typesafe/releases/"
+  val spray = "Spray Repo" at "http://repo.spray.cc/"
 
-  val all = Seq(Akka, Typesafe, Spray)
+  val all = Seq(akka, typesafe, spray)
 }
 
 object Dependencies {
   object V {
-    val Akka = "2.0.3"
-    val ScalaTest = "1.8"
-    val Logback = "1.0.7"
-    val JodaTime = "2.1"
-    val JodaConvert = "1.2"
+    val akka = "2.0.3"
+    val scalatest = "1.8"
+    val logback = "1.0.7"
+    val jodaTime = "2.1"
+    val jodaConvert = "1.2"
   }
 
-  val akkaActor = "com.typesafe.akka" % "akka-actor" % V.Akka
-  val akkaRemote = "com.typesafe.akka" % "akka-remote" % V.Akka
-  val akkaKernel = "com.typesafe.akka" % "akka-kernel" % V.Akka
-  val akkaSlf4j = "com.typesafe.akka" % "akka-slf4j" % V.Akka
-  val akkaTestkit = "com.typesafe.akka" % "akka-testkit" % V.Akka
-  val scalaTest = "org.scalatest" %% "scalatest" % V.ScalaTest % "test"
-  val logback = "ch.qos.logback" % "logback-classic" % V.Logback
-  val jodaTime = "joda-time" % "joda-time" % V.JodaTime
-  val jodaConvert = "org.joda" % "joda-convert" % V.JodaConvert
+  val akkaActor = "com.typesafe.akka" % "akka-actor" % V.akka
+  val akkaRemote = "com.typesafe.akka" % "akka-remote" % V.akka
+  val akkaKernel = "com.typesafe.akka" % "akka-kernel" % V.akka
+  val akkaSlf4j = "com.typesafe.akka" % "akka-slf4j" % V.akka
+  val akkaTestkit = "com.typesafe.akka" % "akka-testkit" % V.akka
+  val scalatest = "org.scalatest" %% "scalatest" % V.scalatest % "test"
+  val logback = "ch.qos.logback" % "logback-classic" % V.logback
+  val jodaTime = "joda-time" % "joda-time" % V.jodaTime
+  val jodaConvert = "org.joda" % "joda-convert" % V.jodaConvert
 
   val all = Seq(
-    akkaActor, akkaRemote, akkaKernel, akkaSlf4j, akkaTestkit, scalaTest, logback, jodaTime, jodaConvert
+    akkaActor, akkaRemote, akkaKernel, akkaSlf4j, akkaTestkit, scalatest, logback, jodaTime, jodaConvert
   )
 }

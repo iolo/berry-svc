@@ -33,21 +33,21 @@ class berryServiceSpec(_system: ActorSystem) extends TestKit(_system)
 
     implicit val timeout = Timeout(1 seconds)
 
-    berryService ! AddEntry(Entry("1", "hello", DateTime.now))
+    val entry1 = Await.result(berryService ? AddEntry(Entry("1", "hello", DateTime.now)), timeout.duration).asInstanceOf[Entry]
 
-    berryService ! AddEntry(Entry("2", "world", DateTime.now))
+    val entry2 = Await.result(berryService ? AddEntry(Entry("2", "world", DateTime.now)), timeout.duration).asInstanceOf[Entry]
 
-    println(Await.result(berryService ? FindEntry("1"), timeout.duration))
+    println(Await.result(berryService ? FindEntry(entry1.id), timeout.duration))
 
-    println(Await.result(berryService ? FindEntry("2"), timeout.duration))
-
-    println(Await.result(berryService ? ListEntries(), timeout.duration))
-
-    berryService ! RemoveEntry("1")
+    println(Await.result(berryService ? FindEntry(entry2.id), timeout.duration))
 
     println(Await.result(berryService ? ListEntries(), timeout.duration))
 
-    berryService ! RemoveEntry("2")
+    berryService ! RemoveEntry(entry1.id)
+
+    println(Await.result(berryService ? ListEntries(), timeout.duration))
+
+    berryService ! RemoveEntry(entry2.id)
 
     println(Await.result(berryService ? ListEntries(), timeout.duration))
   }
